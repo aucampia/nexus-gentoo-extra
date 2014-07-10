@@ -8,6 +8,7 @@
 extra_commands="forcestop"
 
 NEXUS_PIDFILE=/var/run/${RC_SVCNAME}.pid
+NEXUS_JAVA_PKG_NAME=@JAVA_PKG_NAME@
 
 : ${NEXUS_SVCNAME:=${RC_SVCNAME}}
 
@@ -52,7 +53,7 @@ fi
 
 export JAVA_HOME=`java-config ${NEXUS_JVM:+--select-vm ${NEXUS_JVM}} --jre-home`
 
-NEXUS_CLASSPATH=`java-config --classpath ${NEXUS_SVCNAME}${NEXUS_EXTRA_JARS:+,${NEXUS_EXTRA_JARS}}`
+NEXUS_CLASSPATH=`java-config --classpath ${NEXUS_JAVA_PKG_NAME}${NEXUS_EXTRA_JARS:+,${NEXUS_EXTRA_JARS}}`
 NEXUS_CLASSPATH="${NEXUS_CLASSPATH}:${NEXUS_ETCDIR}${NEXUS_EXTRA_CLASSPATH:+:${NEXUS_EXTRA_CLASSPATH}}"
 
 checkconfig() {
