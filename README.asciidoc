@@ -1,0 +1,6 @@
+// Copyright 2014 Iwan Aucamp
+// vim: set ts=8 sw=8 :
+// vim: set filetype=asciidoc :
+= nexus-gentoo-extra
+
+Extra stuff for Sonatype Nexus on Gentoo
