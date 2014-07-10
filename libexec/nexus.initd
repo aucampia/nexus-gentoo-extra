@@ -9,6 +9,7 @@ extra_commands="forcestop"
 
 NEXUS_PIDFILE=/var/run/${RC_SVCNAME}.pid
 NEXUS_JAVA_PKG_NAME=@JAVA_PKG_NAME@
+: ${NEXUS_JAVA_PKG_NAME:=invalid-NEXUS_JAVA_PKG_NAME}
 
 : ${NEXUS_SVCNAME:=${RC_SVCNAME}}
 
