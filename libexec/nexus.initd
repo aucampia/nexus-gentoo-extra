@@ -1,0 +1,117 @@
+#!/sbin/runscript
+# vim: set ts=4 sw=4 :
+# vim: set filetype=gentoo-init-d :
+# Copyright 1999-2014 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+extra_commands="forcestop"
+
+NEXUS_PIDFILE=/var/run/${RC_SVCNAME}.pid
+
+: ${NEXUS_SVCNAME:=${RC_SVCNAME}}
+
+: ${NEXUS_WEBAPPSDIR:=/usr/share/${NEXUS_SVCNAME}/webapps}
+: ${NEXUS_VARDIR:=/var/lib/${NEXUS_SVCNAME}}
+: ${NEXUS_TMPDIR:=/var/tmp/${NEXUS_SVCNAME}}
+: ${NEXUS_LOGDIR:=/var/log/${NEXUS_SVCNAME}}
+: ${NEXUS_ETCDIR:=/etc/${NEXUS_SVCNAME}}
+
+: ${NEXUS_JETTY_CONF=${NEXUS_ETCDIR}/jetty.xml}
+: ${NEXUS_JETTY_REQUESTLOG_CONF=${NEXUS_ETCDIR}/jetty-requestlog.xml}
+
+: ${NEXUS_LOGOUT:=${NEXUS_LOGDIR}/out.log}
+: ${NEXUS_LOGERR:=${NEXUS_LOGDIR}/err.log}
+: ${NEXUS_JETTY_REQUESTLOG_LEVEL:=INFO}
+
+: ${NEXUS_USER:=nexus}
+: ${NEXUS_GROUP:=nexus}
+
+: ${NEXUS_LAUNCHER_CLASS:=org.sonatype.nexus.bootstrap.Launcher}
+
+
+if [ "${#NEXUS_JAVA_OPTS[@]}" -eq 0 ]
+then
+	NEXUS_JAVA_OPTS=(
+		"-Djava.net.preferIPv4Stack=true"
+		"-Dcom.sun.jndi.ldap.connect.pool.protocol=plain ssl"
+		"-DbundleBasedir=${NEXUS_WEBAPPSDIR}"
+		"-Dnexus.var.dir=${NEXUS_VARDIR}"
+		"-Dnexus.tmp.dir=${NEXUS_TMPDIR}"
+		"-Dnexus.log.dir=${NEXUS_LOGDIR}"
+		"-Dnexus.etc.dir=${NEXUS_ETCDIR}"
+		"-Dnexus.log.level=${NEXUS_JETTY_REQUESTLOG_LEVEL}"
+	)
+fi
+
+if [ "${#NEXUS_OPTS[@]}" -eq 0 ]
+then
+	NEXUS_OPTS=( "${NEXUS_JETTY_CONF}" "${NEXUS_JETTY_REQUESTLOG_CONF}" )
+fi
+
+export JAVA_HOME=`java-config ${NEXUS_JVM:+--select-vm ${NEXUS_JVM}} --jre-home`
+
+NEXUS_CLASSPATH=`java-config --classpath ${NEXUS_SVCNAME}${NEXUS_EXTRA_JARS:+,${NEXUS_EXTRA_JARS}}`
+NEXUS_CLASSPATH="${NEXUS_CLASSPATH}:${NEXUS_ETCDIR}${NEXUS_EXTRA_CLASSPATH:+:${NEXUS_EXTRA_CLASSPATH}}"
+
+checkconfig() {
+	if [ ! -d "${NEXUS_WEBAPPSDIR}" ]; then
+		eerror "\${NEXUS_WEBAPPSDIR:=${NEXUS_WEBAPPSDIR}} does not exist. Unable to start ${RC_SVCNAME}."
+		eerror "Please see /etc/conf.d/${RC_SVCNAME} for more information."
+		return 1;
+	fi
+}
+
+depend() {
+	need net
+	use dns logger
+}
+
+start() {
+	ebegin "Starting '${RC_SVCNAME}'"
+	checkconfig || eend "${?}"
+	local cmd=java
+	start-stop-daemon --start \
+		--background --make-pidfile --pidfile "${NEXUS_PIDFILE}" \
+		--chdir "${NEXUS_TMPDIR}" \
+		--user "${NEXUS_USER}" \
+		--group "${NEXUS_GROUP}" \
+		--env "CLASSPATH=${NEXUS_CLASSPATH}" \
+		${NEXUS_UMASK:+--umask ${NEXUS_UMASK}} \
+		${NEXUS_IONICE:+--ionice ${NEXUS_IONICE}} \
+		${NEXUS_NICE:+--nice ${NEXUS_NICE}} \
+		--stdout "${NEXUS_LOGOUT}" \
+		--stderr "${NEXUS_LOGERR}" \
+		--exec ${JAVA_HOME}/bin/${cmd} \
+		-- \
+			-Djava.io.tmpdir="${NEXUS_TMPDIR}" \
+			"${NEXUS_JAVA_OPTS[@]}" \
+			"${NEXUS_LAUNCHER_CLASS}" \
+			"${NEXUS_OPTS[@]}"
+	
+	eend "${?}"
+}
+
+stop() {
+	ebegin "Stopping '${RC_SVCNAME}'"
+	start-stop-daemon --stop \
+		--pidfile "${NEXUS_PIDFILE}" \
+		--retry=3 \
+		
+	eend "${?}"
+}
+
+forcestop() {
+	ebegin "Forcing '${RC_SVCNAME}' to stop"
+
+	start-stop-daemon --stop \
+		--pidfile "${NEXUS_PIDFILE}" \
+		--retry=3 \
+		--signal=9
+
+	if service_started "${RC_SVCNAME}"; then
+		mark_service_stopped "${RC_SVCNAME}"
+	fi
+
+	eend "${?}"
+}

@@ -1,0 +1,37 @@
+#!/bin/sh
+# vim: set ts=4 sw=4 :
+# vim: set filetype=gentoo-conf-d :
+# Settings for Sonatype Nexus OpenRC init script
+
+#NEXUS_SVCNAME="${RC_SVCNAME}"
+
+#NEXUS_WEBAPPSDIR="/usr/share/${NEXUS_SVCNAME}/webapps"
+#NEXUS_VARDIR="/var/lib/${NEXUS_SVCNAME}"
+#NEXUS_TMPDIR="/var/tmp/${NEXUS_SVCNAME}"
+#NEXUS_LOGDIR="/var/log/${NEXUS_SVCNAME}"
+#NEXUS_ETCDIR="/etc/${NEXUS_SVCNAME}"
+#NEXUS_RUNDIR="/var/run/${NEXUS_SVCNAME}"
+
+#NEXUS_JETTY_CONF="${NEXUS_ETCDIR}/jetty.xml"
+#NEXUS_JETTY_REQUESTLOG_CONF="${NEXUS_ETCDIR}/jetty-requestlog.xml"
+
+#NEXUS_LOGOUT="${NEXUS_LOGDIR}/out.log"
+#NEXUS_LOGERR="${NEXUS_LOGDIR}/err.log"
+#NEXUS_JETTY_REQUESTLOG_LEVEL="INFO"
+
+#NEXUS_USER="nexus"
+#NEXUS_GROUP="nexus"
+
+#NEXUS_LAUNCHER_CLASS="org.sonatype.nexus.bootstrap.Launcher"
+
+#NEXUS_JAVA_OPTS=(  )
+#NEXUS_OPTS=( "${NEXUS_JETTY_CONF}" "${NEXUS_JETTY_REQUESTLOG_CONF}" )
+
+#NEXUS_JVM="icedtea-7"
+#NEXUS_EXTRA_JARS=
+#NEXUS_EXTRA_CLASSPATH=
+
+#NEXUS_NICE=
+#NEXUS_IONICE=
+#NEXUS_UMASK=
+
