@@ -16,6 +16,7 @@ NEXUS_PIDFILE=/var/run/${RC_SVCNAME}.pid
 : ${NEXUS_TMPDIR:=/var/tmp/${NEXUS_SVCNAME}}
 : ${NEXUS_LOGDIR:=/var/log/${NEXUS_SVCNAME}}
 : ${NEXUS_ETCDIR:=/etc/${NEXUS_SVCNAME}}
+: ${NEXUS_RUNDIR:=/var/run/${NEXUS_SVCNAME}}
 
 : ${NEXUS_JETTY_CONF=${NEXUS_ETCDIR}/jetty.xml}
 : ${NEXUS_JETTY_REQUESTLOG_CONF=${NEXUS_ETCDIR}/jetty-requestlog.xml}
@@ -71,9 +72,12 @@ start() {
 	ebegin "Starting '${RC_SVCNAME}'"
 	checkconfig || eend "${?}"
 	local cmd=java
+	mkdir -p "${NEXUS_RUNDIR}"
+	chown "${NEXUS_USER}:${NEXUS_GROUP}" "${NEXUS_RUNDIR}"
+	chmod ugo=rX,u+w "${NEXUS_RUNDIR}"
 	start-stop-daemon --start \
 		--background --make-pidfile --pidfile "${NEXUS_PIDFILE}" \
-		--chdir "${NEXUS_TMPDIR}" \
+		--chdir "${NEXUS_RUNDIR}" \
 		--user "${NEXUS_USER}" \
 		--group "${NEXUS_GROUP}" \
 		--env "CLASSPATH=${NEXUS_CLASSPATH}" \
