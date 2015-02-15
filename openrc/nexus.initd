@@ -33,7 +33,7 @@ NEXUS_JAVA_PKG_NAME=@JAVA_PKG_NAME@
 : ${NEXUS_LAUNCHER_CLASS:=org.sonatype.nexus.bootstrap.Launcher}
 
 
-if [ "${#NEXUS_JAVA_OPTS[@]}" -eq 0 ]
+if [ -z "${NEXUS_JAVA_OPTS}" ]
 then
 	NEXUS_JAVA_OPTS=(
 		"-Djava.net.preferIPv4Stack=true"
@@ -47,9 +47,9 @@ then
 	)
 fi
 
-if [ "${#NEXUS_OPTS[@]}" -eq 0 ]
+if [ -z "${NEXUS_OPTS}" ]
 then
-	NEXUS_OPTS=( "${NEXUS_JETTY_CONF}" "${NEXUS_JETTY_REQUESTLOG_CONF}" )
+	NEXUS_OPTS="${NEXUS_JETTY_CONF} ${NEXUS_JETTY_REQUESTLOG_CONF}"
 fi
 
 export JAVA_HOME=`java-config ${NEXUS_JVM:+--select-vm ${NEXUS_JVM}} --jre-home`
@@ -91,9 +91,9 @@ start() {
 		--exec ${JAVA_HOME}/bin/${cmd} \
 		-- \
 			-Djava.io.tmpdir="${NEXUS_TMPDIR}" \
-			"${NEXUS_JAVA_OPTS[@]}" \
+			${NEXUS_JAVA_OPTS} \
 			"${NEXUS_LAUNCHER_CLASS}" \
-			"${NEXUS_OPTS[@]}"
+			${NEXUS_OPTS}
 	
 	eend "${?}"
 }
